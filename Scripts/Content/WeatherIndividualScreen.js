@@ -4,8 +4,10 @@ import
   View,
   Text,
   Platform,
-  ImageBackground,
   SafeAreaView,
+  TouchableOpacity,
+  Image,
+  BackHandler,
 } 
 from 'react-native';
 import 
@@ -29,12 +31,40 @@ export default class WeatherIndividualScreen extends React.Component
     this.state = 
     {
       bln_Loading: false,
+      strTitle: "",
     }
   }
 
   componentDidMount()
   {
-    
+    const {params} = this.props.route
+    let strTitle = ""
+    if(params != undefined && params != null)
+    {
+      if(params.title != undefined && params.title != null && params.title != "")
+      {
+        strTitle = params.title
+      }
+    }
+    this.setState({
+      strTitle: strTitle,
+    })
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress)
+  }
+
+  componentWillUnmount()
+  {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress)
+  }
+  
+  handleBackPress = () => {
+    this.processBack()
+    return true
+  }
+
+  processBack()
+  {
+    this.props.navigation.goBack()
   }
   
   render() 
@@ -66,18 +96,35 @@ export default class WeatherIndividualScreen extends React.Component
                         color: '#FFFFFF',
                         textAlign: "center",
                         fontFamily: "SFProText-Bold",}}>
-                TITLE
+                {this.state.strTitle}
               </Text>
             </View>
+            <TouchableOpacity
+                style={{width: 48,
+                        height: 48,
+                        padding: 5,
+                        left: 0,
+                        position:'absolute',
+                        alignItems:  "center" ,
+                        justifyContent: "center",}}
+                onPress={()=> {this.processBack()}}>
+                <Image 
+                  style = {{width: 24,
+                            height: 24,}}
+                  source={require("../../Images/Icon/back_icon.png")}/>
+              </TouchableOpacity>
           </View>
           <View
             style={{width: "100%",
-                    height: "100%",}}>
+                    height: "100%",
+                    flex: 1,}}>
             <Text>Individual</Text>
           </View>
         </View>
       </SafeAreaView>
     );
   }
+
+  
 
 }

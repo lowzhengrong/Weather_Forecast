@@ -48,7 +48,6 @@ export default class HomeScreen extends React.Component
       arrayWeatherData: [],
       intTextWidth: 0,
       strTodayDate: "",
-      enableScrollViewScroll: true,
     }
   }
 
@@ -59,6 +58,30 @@ export default class HomeScreen extends React.Component
     {
       GLOBALS.CURRENT_SCREEN = "HOME"
     }
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress)
+  }
+
+  componentWillUnmount()
+  {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress)
+  }
+  
+  handleBackPress = () => {
+    this.processBack()
+    return true
+  }
+
+  processBack()
+  {
+    Alert.alert(
+      "Alert",
+      "Are you sure you want to exit the application?",
+      [
+        {text: "NO", style: "destructive", onPress: () => {} },
+        {text: "YES", onPress: () => {BackHandler.exitApp()}},
+      ],
+      { cancelable: false }
+    )
   }
 
   init()
@@ -454,7 +477,7 @@ export default class HomeScreen extends React.Component
 
   clickIndividualItem(itemData)
   {
-    this.props.navigation.navigate("Individual")
+    this.props.navigation.navigate("Individual", {title: this.state.strCurrentLocationName})
   }
 
 }
