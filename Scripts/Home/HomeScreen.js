@@ -24,10 +24,10 @@ import
   convertUnix,
   fetchTimeout,
   isBottomPadding,
+  encryptData,
 } 
 from '../../App.js';
 import GLOBALS from '../../Globals.js';
-import Geocoder from 'react-native-geocoding';
 import AsyncStorage from '@react-native-community/async-storage';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
@@ -42,12 +42,12 @@ export default class HomeScreen extends React.Component
       refreshing: false,
       progressStatus: 0,
       strCurrentLocationName: "Kuala Lumpur",
-      objWeatherData: {},
-      strWeather: "Clear",
+      strWeather: "",
       strWeatherIcon: "",
       arrayWeatherData: [],
       intTextWidth: 0,
       strTodayDate: "",
+      arrayForecast: [],
     }
   }
 
@@ -87,36 +87,56 @@ export default class HomeScreen extends React.Component
   init()
   {
     this.getWeatherData()
-    this.getLocationName()
   }
 
   getWeatherData()
   {
-    AsyncStorage.getItem("WEATHER_API").then((value)=>
-    {
-      if(value != undefined && value != null && value != "")
+    AsyncStorage.multiGet(
+      ["CURRENT_WEATHER_API", "ONECALL_WEATHER", "FORECAST_WEATHER"]
+    ).then(response => {
+      let currentWeather = {}
+      let onecallWeather = {}
+      if(response[0][1] != undefined && response[0][1] != null && response[0][1] != "")
       {
-        const tempData = JSON.parse(getData_Decrypt("WEATHER_API", value))
-        this.processData(tempData)
-      } 
+        currentWeather = JSON.parse(getData_Decrypt(response[0][0], response[0][1]))
+      }
+      if(response[1][1] != undefined && response[1][1] != null && response[1][1] != "")
+      {
+        onecallWeather = JSON.parse(getData_Decrypt(response[1][0], response[1][1]))
+      }
+      if(response[2][1] != undefined && response[2][1] != null && response[2][1] != "")
+      {
+        this.state.arrayForecast = JSON.parse(getData_Decrypt(response[2][0], response[2][1]))
+      }
+      this.processData(currentWeather, onecallWeather, "init")
     })
   }
 
-  processData(tempData)
+  processData(currentWeather, onecallWeather, strAction)
   {
-    if(tempData != undefined && tempData != null)
+    let strCurrentLocationName = this.state.strCurrentLocationName
+    if(strAction != undefined && strAction != null)
     {
-      this.setState({
-        bln_Loading: false,
-        refreshing: false,
-        objWeatherData: tempData,
-        strWeather: tempData.current.weather[0].main,
-        strTemperature: (tempData.current.temp * 1).toFixed(0),
-        strWeatherIcon: GLOBALS.IMAGE_LINK + tempData.current.weather[0].icon + "@2x.png",
-        strTodayDate: convertUnix(tempData.current.dt, "DD MMM YY (ddd)"),
-        arrayWeatherData: tempData.daily,
-      })
+      if(strAction == "init")
+      {
+        strCurrentLocationName = currentWeather.list[0].name
+      }
     }
+    this.setState({
+      bln_Loading: false,
+      refreshing: false,
+      strCurrentLocationName: strCurrentLocationName,
+      strWeather: onecallWeather.current.weather[0].main,
+      strTemperature: (onecallWeather.current.temp * 1).toFixed(0),
+      strWeatherIcon: GLOBALS.IMAGE_LINK + onecallWeather.current.weather[0].icon + "@2x.png",
+      strTodayDate: convertUnix(onecallWeather.current.dt, "DD MMM YY (ddd)"),
+      arrayWeatherData: onecallWeather.daily,
+    }, ()=> {
+      if(GLOBALS.INTERNET)
+      {
+        this.requestForecast(GLOBALS.LATITUDE, GLOBALS.LONGITUDE)
+      }
+    })
   }
 
   _onRefreshWeather = () => {
@@ -127,7 +147,7 @@ export default class HomeScreen extends React.Component
       }, () => {
         setTimeout(() => 
         {
-          this.requestCurrentWeather(GLOBALS.LATITUDE, GLOBALS.LONGITUDE)
+          this.requestOneCallWeather(GLOBALS.LATITUDE, GLOBALS.LONGITUDE)
         }, 300)
       })
     } else
@@ -326,40 +346,7 @@ export default class HomeScreen extends React.Component
     }
   }
 
-  getLocationName()
-  {
-    if(GLOBALS.LATITUDE != "" && GLOBALS.LONGITUDE != "")
-    {
-      if(Geocoder != undefined && Geocoder != null)
-      {
-        Geocoder.from({
-          latitude : GLOBALS.LATITUDE,
-          longitude : GLOBALS.LONGITUDE,
-        }).then(json => {
-          let intIndex = 0
-          let strLocation = ""
-          if(json.results[0].address_components.length > 1)
-          {
-            intIndex = 1
-          }
-          let addressComponent = json.results[0].address_components[intIndex]
-          if(addressComponent.short_name != undefined && addressComponent.short_name != null && addressComponent.short_name != "")
-          {
-            strLocation = addressComponent.short_name
-          }
-          this.setState({
-            strCurrentLocationName: strLocation
-          })
-        })
-        .catch(error => {
-          alertDialog("IN", JSON.stringify(error), "OK")
-          console.log("DEBUG_ZR", JSON.stringify(error))
-        })
-      }
-    }
-  }
-
-  requestCurrentWeather(latitude, longitude)
+  requestOneCallWeather(latitude, longitude)
   {
     const dataParams = `?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&units=metric&exclude=minutely,hourly&appid=${GLOBALS.WEATHER_API_KEY}`
     fetchTimeout(GLOBALS.ONECALL_API + dataParams, {
@@ -370,12 +357,34 @@ export default class HomeScreen extends React.Component
       },
     }).then(response=>{return response.json();})
       .then(data => {
-        this.processData(data)
         const arrayData = []
-        arrayData.push(["WEATHER_API", String(encryptData("WEATHER_API", JSON.stringify(data)))])
+        arrayData.push(["ONECALL_WEATHER", String(encryptData("ONECALL_WEATHER", JSON.stringify(data)))])
         AsyncStorage.multiSet(arrayData, () => {
-          
+          this.processData("", data, "")
         })
+      }).catch((error)=>{
+    })
+  }
+
+  requestForecast(latitude, longitude)
+  {
+    const dataParams = `?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&units=metric&&appid=${GLOBALS.WEATHER_API_KEY}`
+    fetchTimeout(GLOBALS.FORECAST_API + dataParams, {
+      method: 'POST',
+      headers:{
+        'Accept': 'application/json',
+        'Content-type': 'application/json',
+      },
+    }).then(response=>{return response.json();})
+      .then(data => {
+        if(data.list != undefined && data.list != null)
+        {
+          this.state.arrayForecast = data.list
+          const arrayData = []
+          arrayData.push(["FORECAST_WEATHER", String(encryptData("FORECAST_WEATHER", JSON.stringify(data.list)))])
+          AsyncStorage.multiSet(arrayData, () => {
+          })
+        }
       }).catch((error)=>{
     })
   }
@@ -400,7 +409,7 @@ export default class HomeScreen extends React.Component
                 paddingRight: 12,
                 paddingTop: 8,
                 paddingBottom: 8,}}
-        onPress={()=> {this.clickIndividualItem(item)}}>
+        onPress={()=> {this.clickIndividualItem(item, convertUnix(item.dt, "DD-MM-YYYY"))}}>
         <View
           style={{flexDirection: "row"}}>
           <View
@@ -475,9 +484,39 @@ export default class HomeScreen extends React.Component
     )
   }
 
-  clickIndividualItem(itemData)
+  clickIndividualItem(itemData, strDate)
   {
-    this.props.navigation.navigate("Individual", {title: this.state.strCurrentLocationName})
+    const arrayData = []
+    if(this.state.arrayForecast != undefined && this.state.arrayForecast != null && this.state.arrayForecast.length > 0)
+    {
+      for(var x = 0; x < this.state.arrayForecast.length; x++)
+      {
+        const contentData = this.state.arrayForecast[x]
+        if(contentData != undefined && contentData != null)
+        {
+          if(String(convertUnix(contentData.dt, "DD-MM-YYYY")) == String(strDate))
+          {
+            arrayData.push(contentData)
+          }
+        }
+      }
+    }
+    if(arrayData != undefined && arrayData != null && arrayData.length > 0)
+    {
+      this.props.navigation.navigate("Individual", {title: this.state.strCurrentLocationName, data: itemData, hourlyData: arrayData})
+    } else
+    {
+      Alert.alert(
+        "Alert",
+        "Unable to display the hourly data due to the limitation of the api.",
+        [
+          {text: "OK", onPress: () => {
+            this.props.navigation.navigate("Individual", {title: this.state.strCurrentLocationName, data: itemData, hourlyData: arrayData})
+          }},
+        ],
+        { cancelable: false }
+      )
+    }
   }
 
 }

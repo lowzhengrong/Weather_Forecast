@@ -22,4 +22,6 @@ module.exports = {
   IMAGE_LINK: "",
   WEATHER_API_KEY: "",
   ONECALL_API: "https://api.openweathermap.org/data/2.5/onecall",
+  CURRENTWEATHER_API: "https://api.openweathermap.org/data/2.5/find",
+  FORECAST_API: "https://api.openweathermap.org/data/2.5/forecast",
 };

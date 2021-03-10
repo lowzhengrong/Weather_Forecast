@@ -228,6 +228,33 @@ export function storeData(key , value)
   AsyncStorage.setItem(key, value)
 }
 
+export function getWeatherIndividualBackground(strWeather)
+{
+  if(strWeather == "")
+  {
+    return
+  }
+  if(strWeather == "Thunderstorm")
+  {
+    return require("./Images/Weather/img_bg_storm.png")
+  } else if(strWeather == "Drizzle" || strWeather == "Rain")
+  {
+    return require("./Images/Weather/img_bg_rain.png")
+  } else if(strWeather == "Snow")
+  {
+    return require("./Images/Weather/img_bg_snow.png")
+  } else if(strWeather == "Clear")
+  {
+    return require("./Images/Weather/img_bg_clear.png")
+  } else if(strWeather == "Clouds")
+  {
+    return require("./Images/Weather/img_bg_cloudy.png")
+  } else
+  {
+    return require("./Images/Weather/img_bg_hazy.png")
+  }
+}
+
 export function getWeatherBackground(strWeather)
 {
   if(strWeather == "")
@@ -290,10 +317,10 @@ export default class App extends Component<Props> {
         GLOBALS.INTERNET = false
       }
     });
-    if(Geocoder != undefined && Geocoder != null)
-    {
-      Geocoder.init(Config.REACT_APP_GEOCODER_API_KEY)
-    }
+    // if(Geocoder != undefined && Geocoder != null)
+    // {
+    //   Geocoder.init(Config.REACT_APP_GEOCODER_API_KEY)
+    // }
     GLOBALS.IMAGE_LINK = Config.REACT_APP_IMAGE_LINK
     GLOBALS.WEATHER_API_KEY = Config.REACT_APP_WEATHER_API_KEY
   }
@@ -323,7 +350,5 @@ export default class App extends Component<Props> {
       </NavigationContainer>
     )
   }
-
-  
 
 }

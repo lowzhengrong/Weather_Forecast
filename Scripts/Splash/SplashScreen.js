@@ -257,10 +257,32 @@ export default class SplashScreen extends React.Component
 
   requestCurrentWeather(latitude, longitude)
   {
+    const dataParams = `?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&units=metric&cnt=1&appid=${GLOBALS.WEATHER_API_KEY}`
+    fetchTimeout(GLOBALS.CURRENTWEATHER_API + dataParams, {
+      method: 'POST',
+      headers:{
+        'Accept': 'application/json',
+        'Content-type': 'application/json',
+      },
+    }).then(response=>{return response.json();})
+      .then(data => {
+        this.startAnimationLoading(60, 300)
+        const arrayData = []
+        arrayData.push(["CURRENT_WEATHER_API", String(encryptData("CURRENT_WEATHER_API", JSON.stringify(data)))])
+        AsyncStorage.multiSet(arrayData, () => {
+          setTimeout(() => 
+          {
+            this.requestOneCallWeather(latitude, longitude)
+          }, 300)
+        })
+      }).catch((error)=>{
+        this.requestOneCallWeather(latitude, longitude)
+    })
+  }
+
+  requestOneCallWeather(latitude, longitude)
+  {
     const dataParams = `?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&units=metric&exclude=minutely,hourly&appid=${GLOBALS.WEATHER_API_KEY}`
-    // console.log("DEBUG_ZR", GLOBALS.ONECALL_API + 
-    // `?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&exclude=weekly&appid=b51b1d6ef10a92fb6bfc9ab4ad8b98df`)
-    // console.log("DEBUG_ZR", GLOBALS.ONECALL_API + dataParams)
     fetchTimeout(GLOBALS.ONECALL_API + dataParams, {
       method: 'POST',
       headers:{
@@ -269,13 +291,13 @@ export default class SplashScreen extends React.Component
       },
     }).then(response=>{return response.json();})
       .then(data => {
-        this.startAnimationLoading(60, 200)
+        this.startAnimationLoading(80, 300)
         const arrayData = []
-        arrayData.push(["WEATHER_API", String(encryptData("WEATHER_API", JSON.stringify(data)))])
+        arrayData.push(["ONECALL_WEATHER", String(encryptData("ONECALL_WEATHER", JSON.stringify(data)))])
         AsyncStorage.multiSet(arrayData, () => {
           setTimeout(() => 
           {
-            this.startAnimationLoading(100, 600)
+            this.startAnimationLoading(100, 500)
           }, 300)
         })
       }).catch((error)=>{
