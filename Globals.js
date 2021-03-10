@@ -1,0 +1,25 @@
+ import React from 'react';
+
+module.exports = {
+  APP_NAME: "Weather Forecast",
+  DEBUG: false,
+  INTERNET: false,
+  THEMECOLOR: "#37474f",
+  BARCOLOR: "#006D8D",
+  PROGRESSBARCOLOR: "#94defb",
+  SHADOWCOLOR: "#ff833a",
+  SPLASHSCREENTIME: 1200,
+  CURRENT_SCREEN: "",
+  PUSH_TOKEN: "",
+  TOKEN: "",
+  OS: "",
+  IMEI: "",
+  MODEL: "",
+  OS_VERSION: "",
+  APP_VERSION: "",
+  LATITUDE: 3.1390,
+  LONGITUDE: 101.6869,
+  IMAGE_LINK: "",
+  WEATHER_API_KEY: "",
+  ONECALL_API: "https://api.openweathermap.org/data/2.5/onecall",
+};
