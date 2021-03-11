@@ -10,13 +10,12 @@ import
   BackHandler,
   ImageBackground,
   FlatList,
+  Linking,
 } 
 from 'react-native';
 import 
 {
   getScreenWidth,
-  fetchTimeout,
-  encryptData,
   alertDialog,
   getWeatherIndividualBackground,
   getScreenHeight,
@@ -24,8 +23,6 @@ import
 } 
 from '../../App.js';
 import GLOBALS from '../../Globals.js';
-import GetLocation from 'react-native-get-location'
-import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from '@react-native-community/async-storage';
 import { ScrollView } from 'react-native-gesture-handler';
 
@@ -44,6 +41,15 @@ export default class WeatherIndividualScreen extends React.Component
       intTextWidth: 0,
       strWeatherIcon: "",
       strTodayDate: "",
+      strSunrise: "",
+      strSunset: "",
+      strWindSpeed: "",
+      strWindDegree: "",
+      strCloud: "",
+      strFeelLIke: "",
+      strPreasure: "",
+      strHumidity: "",
+      strUVIndex: "",
     }
   }
 
@@ -68,6 +74,7 @@ export default class WeatherIndividualScreen extends React.Component
         arrayHorlyData = params.hourlyData
       }
     }
+
     this.setState({
       strTitle: strTitle,
       strWeather: strData.weather[0].main,
@@ -75,44 +82,16 @@ export default class WeatherIndividualScreen extends React.Component
       strTemperature: (strData.temp.day).toFixed(0),
       strWeatherIcon: GLOBALS.IMAGE_LINK + strData.weather[0].icon + "@2x.png",
       strTodayDate: convertUnix(strData.dt, "DD MMM YY (ddd)"),
+      strSunrise: convertUnix(strData.sunrise, "h:mm a"),
+      strSunset: convertUnix(strData.sunset, "h:mm a"),
+      strWindSpeed: strData.wind_speed,
+      strWindDegree: strData.wind_deg,
+      strCloud: strData.clouds,
+      strFeelLIke: (strData.feels_like.day).toFixed(0),
+      strPreasure: strData.pressure,
+      strHumidity: strData.humidity,
+      strUVIndex: (strData.uvi).toFixed(0),
     })
-    //MAIN DATA
-  //   {
-  //     "dt":1615352400,
-  //     "sunrise":1615332076,
-  //     "sunset":1615375567,
-  //     "temp":{
-  //        "day":34.65,
-  //        "min":23.65,
-  //        "max":35.54,
-  //        "night":26.2,
-  //        "eve":31.12,
-  //        "morn":23.65
-  //     },
-  //     "feels_like":{
-  //        "day":36.43,
-  //        "night":30.25,
-  //        "eve":33.78,
-  //        "morn":26.33
-  //     },
-  //     "pressure":1011,
-  //     "humidity":35,
-  //     "dew_point":17.36,
-  //     "wind_speed":0.81,
-  //     "wind_deg":309,
-  //     "weather":[
-  //        {
-  //           "id":500,
-  //           "main":"Rain",
-  //           "description":"light rain",
-  //           "icon":"10d"
-  //        }
-  //     ],
-  //     "clouds":34,
-  //     "pop":0.66,
-  //     "rain":1.07,
-  //     "uvi":14.42
-  //  }
     BackHandler.addEventListener('hardwareBackPress', this.handleBackPress)
   }
 
@@ -216,6 +195,284 @@ export default class WeatherIndividualScreen extends React.Component
                   </View>
                   <View
                     style={{marginTop: 16,}}>
+                    <View
+                      style={{flexDirection: "row",
+                              width: "100%",
+                              paddingLeft: 16,
+                              paddingRight: 16,}}>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          SUNRISE
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strSunrise}
+                        </Text>
+                      </View>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          SUNSET
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strSunset}
+                        </Text>
+                      </View>
+                    </View>
+                    <View
+                      style={{width: getScreenWidth() - 32,
+                              height: 1,
+                              marginTop: 16,
+                              backgroundColor: "#FFFFFF",
+                              alignSelf: "center",  }}>
+                    </View>
+                    <View
+                      style={{flexDirection: "row",
+                              width: "100%",
+                              marginTop: 16,
+                              paddingLeft: 16,
+                              paddingRight: 16,}}>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          WIND
+                        </Text>
+                        <Text
+                          style={{marginTop: 3,}}>
+                          <Text
+                            style={{color: '#FFFFFF',
+                                    fontSize: 24,
+                                    textShadowColor: GLOBALS.SHADOWCOLOR,
+                                    textShadowOffset: {width: -1, height: 1},
+                                    textShadowRadius: 1,
+                                    fontFamily: "SFProText-Bold",}}>
+                            {this.state.strWindSpeed}
+                          </Text>
+                          <Text
+                            adjustsFontSizeToFit
+                            numberOfLines={1}
+                            allowFontScaling={false}
+                            style={{color: '#FFFFFF',
+                                    fontSize: 16,
+                                    textShadowColor: GLOBALS.SHADOWCOLOR,
+                                    textShadowOffset: {width: -1, height: 1},
+                                    textShadowRadius: 1,
+                                    fontFamily: "SFProText-Bold",}}>
+                            {" m/s"}
+                          </Text>
+                        </Text>
+                      </View>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          WIND DIRECTION
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strWindDegree + "°"}
+                        </Text>
+                      </View>
+                    </View>
+                    <View
+                      style={{width: getScreenWidth() - 32,
+                              height: 1,
+                              marginTop: 16,
+                              backgroundColor: "#FFFFFF",
+                              alignSelf: "center",  }}>
+                    </View>
+                    <View
+                      style={{flexDirection: "row",
+                              width: "100%",
+                              marginTop: 16,
+                              paddingLeft: 16,
+                              paddingRight: 16,}}>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          CLOUDINESS
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strCloud + "%"}
+                        </Text>
+                      </View>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          FEELS LIKE
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strFeelLIke + "°"}
+                        </Text>
+                      </View>
+                    </View>
+                    <View
+                      style={{width: getScreenWidth() - 32,
+                              height: 1,
+                              marginTop: 16,
+                              backgroundColor: "#FFFFFF",
+                              alignSelf: "center",  }}>
+                    </View>
+                    <View
+                      style={{flexDirection: "row",
+                              width: "100%",
+                              marginTop: 16,
+                              paddingLeft: 16,
+                              paddingRight: 16,}}>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          PREASURE
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strPreasure + " hPa"}
+                        </Text>
+                      </View>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          HUMIDITY
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strHumidity + "%"}
+                        </Text>
+                      </View>
+                    </View>
+                    <View
+                      style={{width: getScreenWidth() - 32,
+                              height: 1,
+                              marginTop: 16,
+                              backgroundColor: "#FFFFFF",
+                              alignSelf: "center",  }}>
+                    </View>
+                    <View
+                      style={{flexDirection: "row",
+                              width: "100%",
+                              marginTop: 16,
+                              paddingLeft: 16,
+                              paddingRight: 16,}}>
+                      <View
+                        style={{flex: 0.5}}>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 14,
+                                  fontFamily: "SFProText-Regular",}}>
+                          UV INDEX
+                        </Text>
+                        <Text
+                          style={{color: '#FFFFFF',
+                                  fontSize: 24,
+                                  marginTop: 3,
+                                  textShadowColor: GLOBALS.SHADOWCOLOR,
+                                  textShadowOffset: {width: -1, height: 1},
+                                  textShadowRadius: 1,
+                                  fontFamily: "SFProText-Bold",}}>
+                          {this.state.strUVIndex}
+                        </Text>
+                      </View>
+                      <View
+                        style={{flex: 0.5}}>
+                        
+                      </View>
+                    </View>
+                    <View
+                      style={{width: "100%",
+                              height: 1,
+                              marginTop: 16,
+                              marginBottom: 16,
+                              backgroundColor: "#FFFFFF",
+                              alignSelf: "center",  }}>
+                    </View>
+                    <TouchableOpacity
+                      onPress={()=> {this.clickWebLink("https://openweathermap.org/")}}>
+                      <Text
+                        style={{color: '#FFFFFF',
+                                fontSize: 18,
+                                paddingLeft: 16,
+                                paddingRight: 16,
+                                fontFamily: "SFProText-Regular",}}>
+                        https://openweathermap.org/
+                      </Text>
+                    </TouchableOpacity>
+                    <View
+                      style={{width: "100%",
+                              height: 1,
+                              marginTop: 16,
+                              marginBottom: 16,
+                              backgroundColor: "#FFFFFF",
+                              alignSelf: "center",  }}>
+                    </View>
                     
                   </View>
                 </View>
@@ -224,47 +481,8 @@ export default class WeatherIndividualScreen extends React.Component
           </View>
         </SafeAreaView>
       </ImageBackground>
-      
     );
   }
-
-  //MAIN DATA
-  //   {
-  //     "dt":1615352400,
-  //     "sunrise":1615332076,
-  //     "sunset":1615375567,
-  //     "temp":{
-  //        "day":34.65,
-  //        "min":23.65,
-  //        "max":35.54,
-  //        "night":26.2,
-  //        "eve":31.12,
-  //        "morn":23.65
-  //     },
-  //     "feels_like":{
-  //        "day":36.43,
-  //        "night":30.25,
-  //        "eve":33.78,
-  //        "morn":26.33
-  //     },
-  //     "pressure":1011,
-  //     "humidity":35,
-  //     "dew_point":17.36,
-  //     "wind_speed":0.81,
-  //     "wind_deg":309,
-  //     "weather":[
-  //        {
-  //           "id":500,
-  //           "main":"Rain",
-  //           "description":"light rain",
-  //           "icon":"10d"
-  //        }
-  //     ],
-  //     "clouds":34,
-  //     "pop":0.66,
-  //     "rain":1.07,
-  //     "uvi":14.42
-  //  }
 
   renderHourlyData()
   {
@@ -409,45 +627,6 @@ export default class WeatherIndividualScreen extends React.Component
     {
       intMarginRight = 16
     }
-      //HOUR DATA 
-//   {
-//     "dt":1615399200,
-// "main": {
-//   "temp": 300.01,
-//   "feels_like": 304.23,
-//   "temp_min": 297.76,
-//   "temp_max": 300.01,
-//   "pressure": 1013,
-//   "sea_level": 1013,
-//   "grnd_level": 1001,
-//   "humidity": 77,
-//   "temp_kf": 2.25
-// },
-//     "weather":[
-//        {
-//           "id":500,
-//           "main":"Rain",
-//           "description":"light rain",
-//           "icon":"10n"
-//        }
-//     ],
-//     "clouds":{
-//        "all":50
-//     },
-//     "wind":{
-//        "speed":1.25,
-//        "deg":81
-//     },
-//     "visibility":10000,
-//     "pop":0.61,
-//     "rain":{
-//        "3h":0.93
-//     },
-//     "sys":{
-//        "pod":"n"
-//     },
-//     "dt_txt":"2021-03-10 18:00:00"
-//  },
     return(
       <View
         style={{marginLeft: intMarginLeft,
@@ -501,6 +680,11 @@ export default class WeatherIndividualScreen extends React.Component
         </View>
       </View>
     )
+  }
+
+  clickWebLink(strWebLink)
+  {
+    Linking.openURL(strWebLink)
   }
 
 }
