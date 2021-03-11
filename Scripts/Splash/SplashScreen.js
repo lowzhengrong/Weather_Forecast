@@ -7,6 +7,7 @@ import
   Animated,
   Easing,
   ImageBackground,
+  PermissionsAndroid,
 } 
 from 'react-native';
 import 
@@ -14,10 +15,12 @@ import
   getScreenWidth,
   fetchTimeout,
   encryptData,
+  alertDialog,
 } 
 from '../../App.js';
 import GLOBALS from '../../Globals.js';
 import GetLocation from 'react-native-get-location'
+import Geolocation from '@react-native-community/geolocation';
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from '@react-native-community/async-storage';
 
@@ -35,10 +38,10 @@ export default class SplashScreen extends React.Component
     this.animatedProgress = new Animated.Value(0)
   }
 
-  componentDidMount()
+  async componentDidMount()
   {
+    this.requestPermssion()
     this.handleAnimation()
-    this.getInternetStatus()
   }
   
   handleAnimation = () => {
@@ -48,6 +51,29 @@ export default class SplashScreen extends React.Component
         easing: Easing.ease
     }).start()
   }
+
+  async requestPermssion()
+  {
+    if(Platform.OS === 'ios')
+    {
+      Geolocation.requestAuthorization()
+      this.getInternetStatus()
+    } else
+    {
+      PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, 
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION]).then((granted) => {
+          if (granted["android.permission.ACCESS_FINE_LOCATION"] === PermissionsAndroid.RESULTS.GRANTED && granted["android.permission.ACCESS_COARSE_LOCATION"] === PermissionsAndroid.RESULTS.GRANTED)
+          {
+            this.getInternetStatus()
+          } else
+          {
+            alertDialog("Alert", "Location permission required to access this application.", "OK")
+          }
+      })
+    }
+  }
+
 
   render() 
   {
@@ -154,99 +180,36 @@ export default class SplashScreen extends React.Component
 
   getInternetStatus()
   {
-  //   {
-  //     "type":"wifi",
-  //     "isConnected":true,
-  //     "details":{
-  //        "subnet":"255.255.255.0",
-  //        "isConnectionExpensive":false,
-  //        "ssid":null,
-  //        "bssid":null,
-  //        "ipAddress":"192.168.1.204"
-  //     },
-  //     "isInternetReachable":true
-  //  }
-  if(GLOBALS.INTERNET)
-  {
-    setTimeout(() => 
-    {
-      this.getCurrentLocation()
-    }, 200)
+    this.getCurrentLocation()
     this.startAnimationLoading(20, 700)
-  } else
-  {
-    this.startAnimationLoading(100, GLOBALS.SPLASHSCREENTIME)
-  }
-    // NetInfo.fetch().then(state => {
-    //   if(state.isInternetReachable)
-    //   {
-    //     GLOBALS.INTERNET = state.isConnected
-    //   } else
-    //   {
-    //     GLOBALS.INTERNET = false
-    //   }
-    //   if(GLOBALS.INTERNET)
-    //   {
-    //     setTimeout(() => 
-    //     {
-    //       this.getCurrentLocation()
-    //     }, 200)
-    //     this.startAnimationLoading(20, 700)
-    //   } else
-    //   {
-    //     this.startAnimationLoading(100, GLOBALS.SPLASHSCREENTIME)
-    //   }
-    // });
   }
 
   getCurrentLocation()
   {
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 15000,
-    })
-    .then(location => {
-    //   {
-    //     "verticalAccuracy":10,
-    //     "longitude":101.63563549244554,
-    //     "accuracy":65,
-    //     "time":1615192554574.9988,
-    //     "speed":-1,
-    //     "course":-1,
-    //     "latitude":3.2201231373252357,
-    //     "altitude":67.080162525177
-    //  }
-      let lngLatitude = ""
-      let lngLongitude = ""
-      if(location != undefined && location != null)
+    let lngLatitude = GLOBALS.LATITUDE
+    let lngLongitude = GLOBALS.LONGITUDE
+    Geolocation.getCurrentPosition((position) => {
+      if(position.coords != undefined && position.coords != null)
       {
-        if(location.latitude != undefined && location.latitude != null)
+        if(position.coords.latitude != undefined && position.coords.latitude != null)
         {
-          lngLatitude = location.latitude
+          lngLatitude = position.coords.latitude
         }
-        if(location.longitude != undefined && location.longitude != null)
+        if(position.coords.longitude != undefined && position.coords.longitude != null)
         {
-          lngLongitude = location.longitude
+          lngLongitude = position.coords.longitude
         }
+        this.requestCurrentWeather(lngLatitude, lngLongitude)
+        this.startAnimationLoading(40, 600)
       }
-      if(lngLatitude == "" && lngLatitude == "")
-      {
-        lngLatitude = GLOBALS.LATITUDE
-        lngLatitude = GLOBALS.LONGITUDE
-      }
-      this.startAnimationLoading(40, 600)
-      this.requestCurrentWeather(lngLatitude, lngLongitude)
-    })
-    .catch(error => {
-        const { code, message } = error
-        if(String(code) == "UNAVAILABLE" ||
-           String(code) == "TIMEOUT" ||
-           String(code) == "UNAUTHORIZED")
-        {
-          this.startAnimationLoading(40, 600)
-          this.requestCurrentWeather(GLOBALS.LATITUDE, GLOBALS.LONGITUDE)
-        }
-    })
+      }, (error) => {
+        this.requestCurrentWeather(lngLatitude, lngLongitude)
+        this.startAnimationLoading(40, 600)
+      }, {
+        enableHighAccuracy: true, 
+        timeout: 15000, 
+        maximumAge: 1000},
+    );
   }
 
   toHomeScreen()

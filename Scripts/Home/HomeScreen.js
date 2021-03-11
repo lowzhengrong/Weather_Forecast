@@ -41,7 +41,7 @@ export default class HomeScreen extends React.Component
       bln_Loading: false,
       refreshing: false,
       progressStatus: 0,
-      strCurrentLocationName: "Kuala Lumpur",
+      strCurrentLocationName: "",
       strWeather: "",
       strWeatherIcon: "",
       arrayWeatherData: [],
@@ -225,7 +225,7 @@ export default class HomeScreen extends React.Component
                           refreshing={this.state.refreshing}
                           onRefresh={this._onRefreshWeather}/>
                       }
-                      contentContainerStyle={{flexGrow: 1, paddingBottom: isBottomPadding() ? 48 : 16}}
+                      contentContainerStyle={{flexGrow: 1, paddingBottom: isBottomPadding() ? 48 : 52}}
                       data={this.state.arrayWeatherData}
                       keyExtractor = {(item, index) => index.toString()}
                       renderItem = {this._renderItemWeather}

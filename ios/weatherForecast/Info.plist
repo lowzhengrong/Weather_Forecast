@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>weatherForecast</string>
+	<string>Weather</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -38,9 +38,14 @@
 		</dict>
 	</dict>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>The mobile app uses user&apos;s gps to indicate their location in the map and provide navigation services.</string>
+	<string>The mobile app uses user's gps to indicate their location in the map and provide navigation services.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>The mobile app uses user&apos;s gps to indicate their location in the map and provide navigation services.</string>
+	<string>The mobile app uses user's gps to indicate their location in the map and provide navigation services.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>sfpro_regular.ttf</string>
+		<string>sfpro_bold.ttf</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -57,10 +62,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>UIAppFonts</key>
-	<array>
-		<string>sfpro_regular.ttf</string>
-		<string>sfpro_bold.ttf</string>
-	</array>
 </dict>
 </plist>

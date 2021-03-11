@@ -25,6 +25,7 @@ import NetInfo from "@react-native-community/netinfo";
 import Geocoder from 'react-native-geocoding';
 import moment from 'moment'
 import Config from "react-native-config";
+import DeviceInfo from 'react-native-device-info'
 
 import SplashScreen from './Scripts/Splash/SplashScreen'
 import HomeScreen from './Scripts/Home/HomeScreen'
@@ -84,6 +85,11 @@ export function isIphoneX()
   {
     return false
   }
+}
+
+export function isTablet()
+{
+  return DeviceInfo.isTablet()
 }
 
 export function fetchTimeout(url, options)
