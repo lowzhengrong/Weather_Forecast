@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React from 'react';
 import 
 {
   View,
@@ -6,19 +6,15 @@ import
   BackHandler,
   Alert,
   Image,
-  Platform,
   ImageBackground,
   SafeAreaView,
   FlatList,
   RefreshControl,
   TouchableOpacity,
-  ScrollView,
 } 
 from 'react-native';
 import 
 {
-  getScreenWidth, 
-  alertDialog,
   getData_Decrypt,
   getWeatherBackground,
   convertUnix,
@@ -29,11 +25,11 @@ import
 from '../../App.js';
 import GLOBALS from '../../Globals.js';
 import AsyncStorage from '@react-native-community/async-storage';
-import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 export default class HomeScreen extends React.Component 
 {
 
+  //Example of setState
   constructor(props) {
     super(props);
     this.state = 
