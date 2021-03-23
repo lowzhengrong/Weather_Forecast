@@ -666,7 +666,6 @@ function WeatherIndividualScreen(props)
                             backgroundColor: "#FFFFFF",
                             alignSelf: "center",  }}>
                   </View>
-                  
                 </View>
               </View>
             </ScrollView>

@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React from 'react';
 import 
 {
   View,
@@ -19,9 +19,7 @@ import
 } 
 from '../../App.js';
 import GLOBALS from '../../Globals.js';
-import GetLocation from 'react-native-get-location'
 import Geolocation from '@react-native-community/geolocation';
-import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from '@react-native-community/async-storage';
 
 export default class SplashScreen extends React.Component 

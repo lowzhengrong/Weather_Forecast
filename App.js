@@ -8,11 +8,6 @@
 
 import React, {Component} from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
   Dimensions,
   Alert,
 } from 'react-native';
@@ -22,7 +17,6 @@ import GLOBALS from './Globals.js';
 import CryptoJS from 'crypto-js';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from "@react-native-community/netinfo";
-import Geocoder from 'react-native-geocoding';
 import moment from 'moment'
 import Config from "react-native-config";
 import DeviceInfo from 'react-native-device-info'
@@ -103,13 +97,11 @@ export function fetchTimeout(url, options)
     {
       if(options.body._parts != undefined && options.body._parts != null)
       {
-        // options.body.append('data[imei]', String(GLOBALS.IMEI))
       } else
       {
         const objData = JSON.parse(options.body)
         if(objData.data != undefined && objData.data != null)
         {
-          // objData.data = {... objData.data, imei: String(GLOBALS.IMEI)}
         }
       }
     }
